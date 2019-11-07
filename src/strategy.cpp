@@ -64,16 +64,11 @@ namespace strender {
 		size_t last_pos = 0; // Contains the index of the first character after the last sigil-identifier pair.
 		for (const auto &pair: positions) {
 			piece *pc = pmap.at(pair.first);
-			std::cerr << "pc.id[" << pc->id << "] p.f[" << pair.first << "](" << children.size() << ") fmt[" << format << "]";
-			for (const auto &pp: children)
-				std::cerr << " " << pp.first;
-			std::cerr << "\n";
 
 			oss << format.substr(last_pos, pair.second - last_pos);
 			if (pc->is_atomic()) {
 				oss << pc->render();
 			} else {
-				std::cerr << "!atomic " << pc->id << ": " << pc->children.size() << "\n";
 				if (children.count(pair.first) == 0) {
 					oss << pc->render(strategy());
 				} else {
@@ -101,7 +96,6 @@ namespace strender {
 			children.erase(pair.first);
 		pair.second->parent = this;
 		children.insert({pair.first, pair.second});
-		std::cerr << "[s] insert to " << id << ": " << pair.first << " -> " << children.size() << "\n";
 		return *this;
 	}
 

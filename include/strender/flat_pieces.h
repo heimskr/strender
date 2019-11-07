@@ -7,7 +7,7 @@
 namespace strender {
 	class piece;
 
-	using flat_pair = std::pair<const char *, piece *>;
+	using flat_pair = std::pair<const char *, std::string>;
 
 	struct flat_comp {
 		bool operator()(const flat_pair &lpair, const flat_pair &rpair) const {
@@ -24,7 +24,7 @@ namespace strender {
 	 */
 	using flat_pieces = std::set<flat_pair, flat_comp>;
 
-	// piece * expand(const flat_pieces &);
+	piece * expand(const flat_pieces &);
 }
 
 #endif

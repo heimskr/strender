@@ -25,16 +25,20 @@ int main(int, char **) {
 		return "[" + std::string(raw.rbegin(), raw.rend()) + "]";
 	}, &s_full);
 
-	// flat_pieces flats = {
-	// 	{"h", nullptr},
-	// 	{"hh", new piece("%")}
-	// };
+	flat_pieces flats = {
+		{"h", ""},
+		{"hH", "%"},
+		{"hn", ""},
+		{"mr", "Hey there."},
+		{"hnr", "FRESH"},
+		{"m", ""},
+	};
 
-	piece *p_full = new piece('*', nullptr);
-	piece *p_header  = new piece('h', p_full),  *p_hats = new piece('H', p_header);
-	piece *p_message = new piece('m', p_full),  *p_message_raw = new piece('r', p_message, "Hey there.");
-	piece *p_nick    = new piece('n', p_header), *p_nick_raw    = new piece('r', p_nick, "FRESH");
+	piece *root = expand(flats);
 
-	const std::string rendered = p_full->render(s_full);
+	root->print();
+	std::cout << "\n";
+
+	const std::string rendered = root->render(s_full);
 	std::cout << "\"" << rendered << "\"\n";
 }

@@ -41,6 +41,23 @@ namespace strender {
 		return value;
 	}
 
+	void piece::print() {
+		if (children.empty()) {
+			std::cout << id << ":\"" << value << "\"";
+			return;
+		}
+
+		std::cout << id << "\e[2m[\e[0m";
+		bool first = true;
+		for (const auto &pair: children) {
+			if (!first)
+				std::cout << " ";
+			first = false;
+			pair.second->print();
+		}
+		std::cout << "\e[2m]\e[0m";
+	}
+
 	bool piece::is_atomic() const {
 		return children.empty();
 	}
@@ -50,7 +67,6 @@ namespace strender {
 			children.erase(pair.first);
 		pair.second->parent = this;
 		children.insert({pair.first, pair.second});
-		std::cerr << "[p] insert to " << id << ": " << pair.first << " -> " << children.size() << "\n";
 		return *this;
 	}
 

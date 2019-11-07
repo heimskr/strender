@@ -52,6 +52,8 @@ namespace strender {
 			std::string render(const strategy &);
 			std::string render();
 
+			void print();
+
 			bool is_atomic() const;
 
 			piece & operator+=(const std::pair<char, piece *> &);
