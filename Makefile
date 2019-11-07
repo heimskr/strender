@@ -4,6 +4,9 @@ LDFLAGS			:=
 CC				 = $(COMPILER) $(strip $(CFLAGS) $(CHECKFLAGS))
 CHECKFLAGS		:=
 MKBUILD			:= mkdir -p build
+ifeq ($(DEBUGGER),)
+	DEBUGGER	:= lldb
+endif
 
 ifeq ($(CHECK), asan)
 	CHECKFLAGS += -fsanitize=address -fno-common
@@ -24,6 +27,9 @@ all: $(OBJECTS) build/strender
 
 test: build/strender
 	./build/strender
+
+dbg: build/strender
+	$(DEBUGGER) $<
 
 grind: build/tests
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes ./build/tests

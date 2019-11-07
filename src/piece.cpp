@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "strender/piece.h"
 
 namespace strender {
@@ -46,8 +48,14 @@ namespace strender {
 	piece & piece::operator+=(const std::pair<char, piece *> &pair) {
 		if (children.count(pair.first) > 0)
 			children.erase(pair.first);
+		pair.second->parent = this;
 		children.insert({pair.first, pair.second});
+		std::cerr << "[p] insert to " << id << ": " << pair.first << " -> " << children.size() << "\n";
 		return *this;
+	}
+
+	piece & piece::operator+=(const std::pair<char, piece &> &pair) {
+		return *this += {pair.first, &pair.second};
 	}
 
 	piece * piece::operator[](char ch) const {

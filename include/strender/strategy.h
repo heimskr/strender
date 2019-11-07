@@ -23,17 +23,19 @@ namespace strender {
 			strategy_f func;
 
 			strategy_map children {};
+			char id;
 
 		public:
 			strategy();
-			strategy(const std::string &, strategy * = nullptr);
-			strategy(strategy_f, strategy * = nullptr);
+			strategy(char, const std::string &, strategy * = nullptr);
+			strategy(char, strategy_f, strategy * = nullptr);
 
 			/** Overrides the strategy with a function. */
 			strategy & operator=(strategy_f);
 
 			std::string apply(const piece_map &pmap) const;
 
+			strategy & operator+=(const std::pair<char, strategy *> &);
 			operator bool() const;
 	};
 }
