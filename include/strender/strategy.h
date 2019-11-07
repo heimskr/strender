@@ -3,10 +3,12 @@
 
 #include <string>
 
-#include "strender/piece_set.h"
+#include "strender/piece_map.h"
+#include "strender/strategy_map.h"
 
 namespace strender {
-	using strategy_f = std::function<std::string(const piece_set &)>;
+	using strategy_f = std::function<std::string(const piece_map &)>;
+
 	/**
 	 * There are two ways of producing a rendered string: format strings and custom functions. Format strings are a
 	 * simple string that glues together subpieces, whereas custom functions are given all the subpieces and left to
@@ -16,17 +18,21 @@ namespace strender {
 	class strategy {
 		private:
 			bool empty;
+			strategy *parent;
 			std::string format;
 			strategy_f func;
 
+			strategy_map children {};
+
 		public:
 			strategy();
-			strategy(const std::string &);
-			strategy(strategy_f);
+			strategy(const std::string &, strategy * = nullptr);
+			strategy(strategy_f, strategy * = nullptr);
 
+			/** Overrides the strategy with a function. */
 			strategy & operator=(strategy_f);
 
-			std::string apply(const piece_set &pset);
+			std::string apply(const piece_map &pmap) const;
 
 			operator bool() const;
 	};
