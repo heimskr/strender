@@ -6,18 +6,11 @@
 #include "strender/strnode.h"
 
 namespace strender {
-	// strnode::strnode():
-	// 	empty(true), parent(nullptr), format(""), func({}), id("") {}
-
 	strnode::strnode(const char *id_, const std::string &format_, strnode *parent_):
-	empty(false), parent(parent_), format(format_), func({}), id(id_) {
-		init();
-	}
+		parent(parent_), format(format_), func({}), id(id_) { init(); }
 
 	strnode::strnode(const char *id_, strnode_f func_, strnode *parent_):
-	empty(false), parent(parent_), format(""), func(func_), id(id_) {
-		init();
-	}
+		parent(parent_), format(""), func(func_),   id(id_) { init(); }
 	
 	strnode & strnode::operator=(piece_map &map) {
 		input->swap(map);
@@ -31,8 +24,8 @@ namespace strender {
 	}
 
 	strnode::~strnode() {
-		if (parent == nullptr && !empty) {
-			std::cerr << id << ": deleting data\n";
+		if (!parent) {
+			std::cerr << id << ": deleting data and cached\n";
 			delete input;
 			delete cached;
 		}
@@ -72,12 +65,12 @@ namespace strender {
 	std::string strnode::render() {
 		static const std::string sigil = "$";
 
-		if (is_cached())
+		if (is_cached()) {
+			std::cerr << "Return cached for " << id << "\n";
 			return get_cached();
+		}
 
-		// if (empty) {
-		// 	return cache(std::string(input->begin()->second));
-		// }
+		std::cerr << "Calculating for " << id << "\n";
 
 		if (func)
 			return cache(func(*input));
@@ -115,17 +108,7 @@ namespace strender {
 		for (const auto &pair: positions) {
 			piece &pc = input->at(pair.first);
 
-			oss << format.substr(last_pos, pair.second - last_pos);
-			oss << pc.render();
-			// if (pc->is_atomic()) {
-			// } else {
-			// 	if (children.count(pair.first) == 0) {
-			// 		oss << pc->render(strnode());
-			// 	} else {
-			// 		oss << pc->render(*children.at(pair.first));
-			// 	}
-			// }
-
+			oss << format.substr(last_pos, pair.second - last_pos) << pc.render();
 			last_pos = pair.second + 2 + std::strlen(pair.first);
 		}
 
@@ -137,7 +120,6 @@ namespace strender {
 
 	strnode & strnode::operator=(strnode_f func_) {
 		func = func_;
-		empty = false;
 		format.clear();
 		return *this;
 	}
@@ -148,9 +130,5 @@ namespace strender {
 		pair.second->parent = this;
 		children.insert({pair.first, pair.second});
 		return *this;
-	}
-
-	strnode::operator bool() const {
-		return empty;
 	}
 }

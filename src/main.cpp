@@ -24,27 +24,17 @@ int main(int, char **) {
 		return "[" + std::string(raw.rbegin(), raw.rend()) + "]";
 	}, &s_full);
 
-	s_full = {{"message_raw", "Hey there."}, {"nick_raw", "FRESH"}, {"hats", "%"}, {"header", &s_header}, {"nick", &s_nick}, {"message", &s_message}};
-
-	const std::string rendered = s_full.render();
-	std::cout << "\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
-
-	/*
-	flat_pieces flats = {
-		{"h", ""},
-		{"hH", "%"},
-		{"hn", ""},
-		{"mr", "Hey there."},
-		{"hnr", "FRESH"},
-		{"m", ""},
+	s_full = {
+		{"message_raw", "Hey there."},
+		{"nick_raw", "FRESH"},
+		{"hats", "%"},
+		{"header", &s_header},
+		{"nick", &s_nick},
+		{"message", &s_message}
 	};
 
-	piece *root = expand(flats);
-
-	root->print();
-	std::cout << "\n";
-
-	const std::string rendered = root->render(s_full);
-	std::cout << "\"" << rendered << "\"\n";
-	//*/
+	std::string rendered = s_full.render();
+	std::cout << "\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
+	rendered = s_full.render();
+	std::cout << "\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
 }
