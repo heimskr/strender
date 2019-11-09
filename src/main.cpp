@@ -1,9 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "strender/flat_pieces.h"
-#include "strender/piece.h"
-#include "strender/strategy.h"
+#include "strender/defs.h"
+#include "strender/strnode.h"
 
 int main(int, char **) {
 	using namespace strender;
@@ -14,16 +13,21 @@ int main(int, char **) {
 	// root <            [n]ick < [r]aw_nick
 	//        [m]essage - [raw]_message
 
-	strategy s_full('*', "$h $m");
+	strnode s_full("*", "$header$ $message$");
 
-	strategy s_header('h', "<$H$n>", &s_full);
-	strategy s_nick('r', "$r", &s_header);
+	strnode s_header("header", "<$hats$$nick$>", &s_full);
+	strnode s_nick("nick", "$nick_raw$", &s_header);
 
 	// Reverse raw message and surround with brackets.
-	strategy s_message('m', [](const piece_map &pmap) -> std::string {
-		std::string raw = pmap.at('r')->render();
+	strnode s_message("message", [](piece_map &map) -> std::string {
+		std::string raw = map.at("message_raw").render();
 		return "[" + std::string(raw.rbegin(), raw.rend()) + "]";
 	}, &s_full);
+
+	
+
+
+	/*
 
 	flat_pieces flats = {
 		{"h", ""},
@@ -41,4 +45,5 @@ int main(int, char **) {
 
 	const std::string rendered = root->render(s_full);
 	std::cout << "\"" << rendered << "\"\n";
+	//*/
 }

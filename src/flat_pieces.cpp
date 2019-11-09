@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 
 #include "strender/flat_pieces.h"
@@ -30,3 +31,5 @@ namespace strender {
 		return root;
 	}
 }
+
+//*/
