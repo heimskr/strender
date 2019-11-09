@@ -15,10 +15,10 @@ int main(int, char **) {
 	// root <            [n]ick < [r]aw_nick
 	//        [m]essage - [raw]_message
 
-	strnode s_full("*", "$header$ $message$");
+	strnode root("*", "$header$ $message$");
 
-	strnode s_header("header", "<$hats$$nick$>", &s_full);
-	strnode s_nick("nick", "$nick_raw$", &s_header);
+	strnode header("header", "<$hats$$nick$>", &root);
+	strnode nick("nick", "$nick_raw$", &header);
 
 	// Reverse raw message and surround with brackets.
 	strnode s_message("message", [](piece_map &map) -> std::string {
@@ -33,14 +33,24 @@ int main(int, char **) {
 		}
 		oss << "\e[0m";
 		return oss.str();
-	}, &s_full);
+	}, &root);
 
-	s_full = {
+	root = {
 		{"message_raw", "Hey there. This is a test message."},
-		{"nick_raw", "FRESH"},
+		{"nick_raw", "Kai"},
 		{"hats", "%"},
 	};
 
-	std::string rendered = s_full.render();
-	std::cout << "\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
+	std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
+
+	nick = [](piece_map &map) -> std::string {
+		std::string raw = map.at("nick_raw").render();
+		std::string out;
+		std::transform(raw.begin(), raw.end(), std::back_inserter(out), [](char ch) {
+			return ('a' <= ch && ch <= 'z')? ch - 'a' + 'A' : ch;
+		});
+		return out;
+	};
+
+	std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
 }

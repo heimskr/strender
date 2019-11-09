@@ -127,9 +127,27 @@ namespace strender {
 			pair.second->auto_assign();
 	}
 
+	void strnode::reset_all() {
+		cached->clear();
+	}
+
+	void strnode::uncache() {
+		cached->erase(id);
+		if (parent)
+			parent->uncache();
+	}
+
 	strnode & strnode::operator=(strnode_f func_) {
 		func = func_;
 		format.clear();
+		uncache();
+		return *this;
+	}
+
+	strnode & strnode::operator=(const std::string &format_) {
+		format = format_;
+		func = {};
+		uncache();
 		return *this;
 	}
 

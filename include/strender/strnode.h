@@ -42,9 +42,13 @@ namespace strender {
 
 			/** Overrides the strnode with a function. */
 			strnode & operator=(strnode_f);
+			/** Overrides the strnode with a format string. */
+			strnode & operator=(const std::string &);
 
 			std::string render();
 			void auto_assign();
+			void reset_all();
+			void uncache();
 
 			strnode & operator+=(const std::pair<const char *, strnode *> &);
 	};
