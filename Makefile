@@ -17,8 +17,7 @@ endif
 .PHONY: all test clean depend mkbuild
 all: Makefile
 
-
-SOURCES			:= $(shell find -L src -name '*.cpp' | sed -nE '/(tests?|test_.+)\.cpp$$/!p')
+SOURCES			:= $(shell find -L src -name '*.cpp')
 OBJECTS			:= $(patsubst src/%.cpp,build/%.o, $(SOURCES))
 
 sinclude $(shell find src -name 'targets.mk')
