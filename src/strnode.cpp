@@ -137,6 +137,10 @@ namespace strender {
 			parent->uncache();
 	}
 
+	bool strnode::is_format() const {
+		return !func;
+	}
+
 	strnode & strnode::operator=(strnode_f func_) {
 		func = func_;
 		format.clear();

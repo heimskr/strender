@@ -49,6 +49,7 @@ namespace strender {
 			void auto_assign();
 			void reset_all();
 			void uncache();
+			bool is_format() const;
 
 			strnode & operator+=(const std::pair<const char *, strnode *> &);
 	};
