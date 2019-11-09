@@ -28,9 +28,6 @@ int main(int, char **) {
 		{"message_raw", "Hey there."},
 		{"nick_raw", "FRESH"},
 		{"hats", "%"},
-		{"header", &s_header},
-		{"nick", &s_nick},
-		{"message", &s_message}
 	};
 
 	std::string rendered = s_full.render();

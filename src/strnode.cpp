@@ -14,12 +14,14 @@ namespace strender {
 	
 	strnode & strnode::operator=(piece_map &map) {
 		input->swap(map);
+		auto_assign();
 		return *this;
 	}
 
 	strnode & strnode::operator=(const piece_map &map) {
 		piece_map copy(map);
 		input->swap(copy);
+		auto_assign();
 		return *this;
 	}
 
@@ -116,6 +118,14 @@ namespace strender {
 			oss << format.substr(last_pos);
 
 		return cache(oss.str());
+	}
+
+	void strnode::auto_assign() {
+		std::cerr << "Auto-assigning " << id << ".\n";
+		if (parent)
+			input->insert({id, this});
+		for (auto &pair: children)
+			pair.second->auto_assign();
 	}
 
 	strnode & strnode::operator=(strnode_f func_) {

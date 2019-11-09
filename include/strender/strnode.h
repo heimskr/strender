@@ -44,6 +44,7 @@ namespace strender {
 			strnode & operator=(strnode_f);
 
 			std::string render();
+			void auto_assign();
 
 			strnode & operator+=(const std::pair<const char *, strnode *> &);
 	};
