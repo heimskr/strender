@@ -2,6 +2,7 @@
 #define STRENDER_STRATEGY_H_
 
 #include <string>
+#include <unordered_map>
 
 #include "strender/piece_map.h"
 #include "strender/strategy_map.h"
@@ -21,14 +22,19 @@ namespace strender {
 			strategy *parent;
 			std::string format;
 			strategy_f func;
+			std::unordered_map<char, std::string> *data;
 
 			strategy_map children {};
 			char id;
+
+			void init();
 
 		public:
 			strategy();
 			strategy(char, const std::string &, strategy * = nullptr);
 			strategy(char, strategy_f, strategy * = nullptr);
+
+			~strategy();
 
 			/** Overrides the strategy with a function. */
 			strategy & operator=(strategy_f);

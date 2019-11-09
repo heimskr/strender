@@ -11,14 +11,28 @@ namespace strender {
 
 	strategy::strategy(char id_, const std::string &format_, strategy *parent_):
 	empty(false), parent(parent_), format(format_), func({}), id(id_) {
-		if (parent_)
-			*parent_ += {id_, this};
+		init();
 	}
 
 	strategy::strategy(char id_, strategy_f func_, strategy *parent_):
 	empty(false), parent(parent_), format(""), func(func_), id(id_) {
-		if (parent_)
-			*parent += {id_, this};
+		init();
+	}
+
+	strategy::~strategy() {
+		if (parent == nullptr && !empty) {
+			std::cerr << id << ": deleting data\n";
+			delete data;
+		}
+	}
+
+	void strategy::init() {
+		if (parent) {
+			*parent += {id, this};
+			data = parent->data;
+		} else {
+			data = new std::unordered_map<char, std::string>;
+		}
 	}
 
 	std::string strategy::apply(const piece_map &pmap) const {

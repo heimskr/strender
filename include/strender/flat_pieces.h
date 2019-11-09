@@ -20,7 +20,7 @@ namespace strender {
 
 	/**
 	 * Represents a flattened tree of pieces.
-	 * For example, a < [b < [d, e], c < [f, g]] consists of a, ab, abd, abe, ac, acf and acg.
+	 * For example, a(b(d e) c(f g)) consists of a, ab, abd, abe, ac, acf and acg.
 	 */
 	using flat_pieces = std::set<flat_pair, flat_comp>;
 
