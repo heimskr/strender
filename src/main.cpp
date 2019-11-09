@@ -1,5 +1,7 @@
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include "strender/defs.h"
 #include "strender/strnode.h"
@@ -20,18 +22,25 @@ int main(int, char **) {
 
 	// Reverse raw message and surround with brackets.
 	strnode s_message("message", [](piece_map &map) -> std::string {
-		std::string raw = map.at("message_raw").render();
-		return "[" + std::string(raw.rbegin(), raw.rend()) + "]";
+		static std::string colors[] = {"1", "8;5;202", "3", "2", "6", "4", "8;5;56", "5"};
+		std::ostringstream oss;
+		int i = -1;
+		for (char ch: map.at("message_raw").render()) {
+			if (std::iswspace(ch))
+				oss << ch;
+			else
+				oss << "\e[3" << colors[++i % (sizeof(colors) / sizeof(std::string))] << "m" << ch;
+		}
+		oss << "\e[0m";
+		return oss.str();
 	}, &s_full);
 
 	s_full = {
-		{"message_raw", "Hey there."},
+		{"message_raw", "Hey there. This is a test message."},
 		{"nick_raw", "FRESH"},
 		{"hats", "%"},
 	};
 
 	std::string rendered = s_full.render();
-	std::cout << "\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
-	rendered = s_full.render();
 	std::cout << "\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
 }

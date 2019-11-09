@@ -5,6 +5,10 @@
 #include "strender/piece.h"
 #include "strender/strnode.h"
 
+#ifndef STRENDER_SIGIL
+#define STRENDER_SIGIL "$"
+#endif
+
 namespace strender {
 	strnode::strnode(const char *id_, const std::string &format_, strnode *parent_):
 		parent(parent_), format(format_), func({}), id(id_) { init(); }
@@ -27,7 +31,6 @@ namespace strender {
 
 	strnode::~strnode() {
 		if (!parent) {
-			std::cerr << id << ": deleting data and cached\n";
 			delete input;
 			delete cached;
 		}
@@ -65,14 +68,10 @@ namespace strender {
 	}
 
 	std::string strnode::render() {
-		static const std::string sigil = "$";
+		static const std::string sigil = STRENDER_SIGIL;
 
-		if (is_cached()) {
-			std::cerr << "Return cached for " << id << "\n";
+		if (is_cached())
 			return get_cached();
-		}
-
-		std::cerr << "Calculating for " << id << "\n";
 
 		if (func)
 			return cache(func(*input));
@@ -121,9 +120,9 @@ namespace strender {
 	}
 
 	void strnode::auto_assign() {
-		std::cerr << "Auto-assigning " << id << ".\n";
 		if (parent)
 			input->insert({id, this});
+
 		for (auto &pair: children)
 			pair.second->auto_assign();
 	}
