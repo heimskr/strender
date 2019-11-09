@@ -24,11 +24,12 @@ int main(int, char **) {
 		return "[" + std::string(raw.rbegin(), raw.rend()) + "]";
 	}, &s_full);
 
-	
+	s_full = {{"message_raw", "Hey there."}, {"nick_raw", "FRESH"}, {"hats", "%"}, {"header", &s_header}, {"nick", &s_nick}, {"message", &s_message}};
 
+	const std::string rendered = s_full.render();
+	std::cout << "\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
 
 	/*
-
 	flat_pieces flats = {
 		{"h", ""},
 		{"hH", "%"},

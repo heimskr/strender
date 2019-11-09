@@ -85,7 +85,10 @@ namespace strender {
 		// Find all positions and insert pairs of the identifiers and positions in order into a list.
 		std::list<std::pair<const char *, size_t>> positions {};
 		for (const auto &pair: *input) {
-			size_t pos = format.find(sigil + pair.first + sigil);
+			const size_t pos = format.find(sigil + pair.first + sigil);
+			if (pos == std::string::npos)
+				continue;
+
 			if (positions.empty() || pos < positions.front().second) {
 				// If the list is empty or the new position is smaller than the front of the list, push it to the front.
 				positions.push_front({pair.first, pos});
