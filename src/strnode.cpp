@@ -39,11 +39,11 @@ namespace strender {
 	void strnode::init() {
 		if (parent) {
 			*parent += {id, this};
-			input  = parent->input;
-			cached = parent->cached;
+			input     = parent->input;
+			cached    = parent->cached;
 		} else {
-			input  = new std::unordered_map<const char *, piece>();
-			cached = new string_map();
+			input     = new piece_map();
+			cached    = new string_map();
 		}
 	}
 
@@ -77,22 +77,23 @@ namespace strender {
 			return cache(func(*input));
 
 		// Find all positions and insert pairs of the identifiers and positions in order into a list.
-		std::list<std::pair<const char *, size_t>> positions {};
+		std::list<std::pair<const char *, size_t>> position_list {};
 		for (const auto &pair: *input) {
 			const size_t pos = format.find(sigil + pair.first + sigil);
 			if (pos == std::string::npos)
 				continue;
+			std::cerr << "\"" << format << "\".find($" << pair.first << "$) == " << pos << "\n";
 
-			if (positions.empty() || pos < positions.front().second) {
+			if (position_list.empty() || pos < position_list.front().second) {
 				// If the list is empty or the new position is smaller than the front of the list, push it to the front.
-				positions.push_front({pair.first, pos});
+				position_list.push_front({pair.first, pos});
 			} else {
 				// Otherwise, look for the first element larger than the new position.
 				bool inserted = false;
-				for (auto it = positions.begin(), end = positions.end(); it != end; ++it) {
+				for (auto it = position_list.begin(), end = position_list.end(); it != end; ++it) {
 					if (pos < it->second) {
 						// If one is found, insert the new position before it and stop.
-						positions.insert(it, {pair.first, pos});
+						position_list.insert(it, {pair.first, pos});
 						inserted = true;
 						break;
 					}
@@ -100,17 +101,34 @@ namespace strender {
 
 				// If no larger value was found, the new position is the largest and is pushed to the back.
 				if (!inserted)
-					positions.push_back({pair.first, pos});
+					position_list.push_back({pair.first, pos});
 			}
 		}
 
 		std::ostringstream oss;
-		size_t last_pos = 0; // Contains the index of the first character after the last sigil-identifier pair.
-		for (const auto &pair: positions) {
-			piece &pc = input->at(pair.first);
+		positions.clear();
 
-			oss << format.substr(last_pos, pair.second - last_pos) << pc.render();
-			last_pos = pair.second + 2 + std::strlen(pair.first);
+		// Contains the index of the first character after the last sigil-identifier pair.
+		size_t last_pos = 0;
+
+		// In each iteration of the following for loop, this contains the sum of the length of all prior sigiled names.
+		size_t name_lengths = 0;
+
+		// Contains the sum of all prior renderings.
+		size_t rendered_lengths = 0;
+
+		for (const auto &pair: position_list) {
+			piece &pc = input->at(pair.first);
+			positions.insert({pair.first, pair.second - name_lengths + rendered_lengths});
+
+			const std::string from_format = format.substr(last_pos, pair.second - last_pos);
+			const std::string rendered = pc.render();
+			oss << from_format << rendered;
+			const size_t name_length = 2 + std::strlen(pair.first);
+			last_pos = pair.second + name_length;
+
+			name_lengths += name_length;
+			rendered_lengths += rendered.length();
 		}
 
 		if (last_pos != format.length())

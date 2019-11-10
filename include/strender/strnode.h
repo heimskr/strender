@@ -23,7 +23,8 @@ namespace strender {
 			string_map *cached = nullptr;
 
 			strnode_map children {};
-			const char * id;
+
+			const char *id;
 
 			void init();
 
@@ -33,6 +34,8 @@ namespace strender {
 			const std::string & cache(std::string &&);
 
 		public:
+			size_map positions;
+
 			strnode(const char *, const std::string &, strnode * = nullptr);
 			strnode(const char *, strnode_f, strnode * = nullptr);
 			strnode & operator=(piece_map &);

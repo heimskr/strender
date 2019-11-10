@@ -41,7 +41,7 @@ int main(int, char **) {
 		{"hats", "%"},
 	};
 
-	std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
+	// std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
 
 	nick = [](piece_map &map) -> std::string {
 		std::string raw = map.at("nick_raw").render();
@@ -52,5 +52,15 @@ int main(int, char **) {
 		return out;
 	};
 
-	std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
+	// std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
+
+	strnode foo("*", "hello $one$ $two$ $three$ $four$ $five$ bye");
+	foo = {{"one", "hi"}, {"two", "hello there"}, {"three", "what's up"}, {"four", "idk :^)"}, {"five", "k"}};
+
+	const std::string rendered = foo.render();
+	std::cout << "\n\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
+	std::cerr << "\nfoo.positions:\n";
+	for (const auto &pair: foo.positions) {
+		std::cerr << "{" << pair.first << ", " << pair.second << "}\n";
+	}
 }
