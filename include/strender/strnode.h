@@ -40,7 +40,6 @@ namespace strender {
 			strnode();
 			strnode(const char *, const std::string &, strnode * = nullptr);
 			strnode(const char *, strnode_f, strnode * = nullptr);
-			strnode & operator=(piece_map &);
 			strnode & operator=(const piece_map &);
 			
 			~strnode();
@@ -55,6 +54,9 @@ namespace strender {
 			void reset_all();
 			void uncache();
 			bool is_format() const;
+
+			/** Creates a copy of this node with a different parent. */
+			void copy(strnode *new_parent, strnode &out) const;
 
 			strnode & operator+=(const std::pair<const char *, strnode *> &);
 	};

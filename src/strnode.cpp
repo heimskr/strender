@@ -19,16 +19,15 @@ namespace strender {
 
 	strnode::strnode(const char *id_, strnode_f func_, strnode *parent_):
 		parent(parent_), format(""), func(func_),   id(id_) { init(); }
-	
-	strnode & strnode::operator=(piece_map &map) {
-		input->swap(map);
-		auto_assign();
-		return *this;
-	}
 
 	strnode & strnode::operator=(const piece_map &map) {
-		piece_map copy(map);
-		input->swap(copy);
+		for (const auto &pair: map) {
+			if (0 < input->count(pair.first))
+				input->erase(pair.first);
+			input->insert({pair.first, pair.second});
+		}
+
+		cached->clear();
 		auto_assign();
 		return *this;
 	}
@@ -206,6 +205,19 @@ namespace strender {
 
 	bool strnode::is_format() const {
 		return !func;
+	}
+
+	void strnode::copy(strnode *new_parent, strnode &out) const {
+		out = *this;
+		out.parent = new_parent;
+		if (new_parent) {
+			*new_parent += {id, &out};
+			out.input = new_parent->input;
+			out.cached = new_parent->cached;
+		} else {
+			out.input  = new piece_map();
+			out.cached = new string_map();
+		}
 	}
 
 	strnode & strnode::operator=(strnode_f func_) {
