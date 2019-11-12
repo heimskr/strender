@@ -43,11 +43,11 @@ namespace strender {
 	void strnode::init() {
 		if (parent) {
 			*parent += {id, this};
-			input     = parent->input;
-			cached    = parent->cached;
+			input    = parent->input;
+			cached   = parent->cached;
 		} else {
-			input     = new piece_map();
-			cached    = new string_map();
+			input  = new piece_map();
+			cached = new string_map();
 		}
 	}
 
@@ -223,7 +223,7 @@ namespace strender {
 	}
 
 	strnode & strnode::operator+=(const std::pair<const char *, strnode *> &pair) {
-		if (children.count(pair.first) > 0)
+		if (0 < children.count(pair.first))
 			children.erase(pair.first);
 		pair.second->parent = this;
 		children.insert({pair.first, pair.second});
