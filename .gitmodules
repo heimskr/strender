@@ -1,0 +1,3 @@
+[submodule "formicine"]
+	path = formicine
+	url = https://github.com/heimskr/formicine

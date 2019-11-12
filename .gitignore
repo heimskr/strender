@@ -1,5 +1,6 @@
 .dep
 /build
+.log
 
 # Prerequisites
 *.d

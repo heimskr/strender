@@ -131,6 +131,13 @@ namespace strender {
 			rendered_lengths += rendered.length();
 		}
 
+		// If this node has a parent, copy and adjust all of this node's positions.
+		if (parent && 0 < parent->positions.count(id)) {
+			const size_t offset = parent->positions.at(id);
+			for (const auto &pair: positions)
+				parent->positions.insert({pair.first, pair.second + offset});
+		}
+
 		if (last_pos != format.length())
 			oss << format.substr(last_pos);
 

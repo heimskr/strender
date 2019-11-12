@@ -6,9 +6,13 @@
 #include "strender/defs.h"
 #include "strender/strnode.h"
 
+#include "lib/formicine/ansi.h"
+
 int main(int, char **) {
 	using namespace strender;
 	using namespace std::string_literals;
+
+	ansi::dbgstream << "-------------\n\e[2J\e[H";
 
 	//                   raw_[h]ats
 	//        [h]eader <
@@ -54,13 +58,17 @@ int main(int, char **) {
 
 	// std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
 
-	strnode foo("*", "hello $one$ $two$ $three$ $four$ $five$ bye");
-	foo = {{"one", "hi"}, {"two", "hello there"}, {"three", "what's up"}, {"four", "idk :^)"}, {"five", "k"}};
+	strnode root_("*", "hello $one$ $two$ $foo$ $three$ $four$ $five$ bye");
+	strnode foo("foo", "[$bar$]", &root_);
+	root_ = {
+		{"one", "hi"}, {"two", "hello there"}, {"three", "what's up"}, {"four", "idk :^)"}, {"five", "k"},
+		{"bar", "greetings"}
+	};
 
-	const std::string rendered = foo.render();
+	const std::string rendered = root_.render();
 	std::cout << "\n\e[2m\"\e[0m" << rendered << "\e[2m\"\e[0m\n";
-	std::cerr << "\nfoo.positions:\n";
-	for (const auto &pair: foo.positions) {
+	std::cerr << "\nroot_.positions:\n";
+	for (const auto &pair: root_.positions) {
 		std::cerr << "{" << pair.first << ", " << pair.second << "}\n";
 	}
 }
