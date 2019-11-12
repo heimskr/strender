@@ -5,6 +5,10 @@
 #include "strender/piece.h"
 #include "strender/strnode.h"
 
+#ifndef STRENDER_NO_ANSI
+#include "lib/formicine/ansi.h"
+#endif
+
 #ifndef STRENDER_SIGIL
 #define STRENDER_SIGIL "$"
 #endif
@@ -77,23 +81,35 @@ namespace strender {
 			return cache(func(*input));
 
 		// Find all positions and insert pairs of the identifiers and positions in order into a list.
-		std::list<std::pair<const char *, size_t>> position_list {};
+		// The first position in the pair is a position within the unstripped format string.
+		// The second is within the stripped format string.
+		std::list<std::pair<const char *, std::pair<size_t, size_t>>> position_list {};
+		const std::string stripped_format = ansi::strip(format);
 		for (const auto &pair: *input) {
-			const size_t pos = format.find(sigil + pair.first + sigil);
+			// Look for $name$ in the format string.
+			const std::string to_find = sigil + pair.first + sigil;
+			const size_t pos = format.find(to_find);
 			if (pos == std::string::npos)
 				continue;
-			std::cerr << "\"" << format << "\".find($" << pair.first << "$) == " << pos << "\n";
 
-			if (position_list.empty() || pos < position_list.front().second) {
+#ifdef STRENDER_NO_ANSI
+			const std::pair<const char *, std::pair<size_t, size_t>> to_insert = {pair.first, {pos, 0}};
+#else
+			// If we found $name$ in the format string, find it in the stripped format string too.
+			const size_t stripped_pos = stripped_format.find(to_find);
+			const std::pair<const char *, std::pair<size_t, size_t>> to_insert = {pair.first, {pos, stripped_pos}};
+#endif
+
+			if (position_list.empty() || pos < position_list.front().second.first) {
 				// If the list is empty or the new position is smaller than the front of the list, push it to the front.
-				position_list.push_front({pair.first, pos});
+				position_list.push_front(to_insert);
 			} else {
 				// Otherwise, look for the first element larger than the new position.
 				bool inserted = false;
 				for (auto it = position_list.begin(), end = position_list.end(); it != end; ++it) {
-					if (pos < it->second) {
+					if (pos < it->second.first) {
 						// If one is found, insert the new position before it and stop.
-						position_list.insert(it, {pair.first, pos});
+						position_list.insert(it, to_insert);
 						inserted = true;
 						break;
 					}
@@ -101,7 +117,7 @@ namespace strender {
 
 				// If no larger value was found, the new position is the largest and is pushed to the back.
 				if (!inserted)
-					position_list.push_back({pair.first, pos});
+					position_list.push_back(to_insert);
 			}
 		}
 
@@ -119,16 +135,37 @@ namespace strender {
 
 		for (const auto &pair: position_list) {
 			piece &pc = input->at(pair.first);
-			positions.insert({pair.first, pair.second - name_lengths + rendered_lengths});
+			const size_t unstripped_pos = pair.second.first;
 
-			const std::string from_format = format.substr(last_pos, pair.second - last_pos);
+			// Adjust the position (subtract the length of the $names$ and add the length
+			// of all previously rendered text) and insert it into the positions map.
+#ifdef STRENDER_NO_ANSI
+			positions.insert({pair.first, unstripped_pos - name_lengths + rendered_lengths});
+#else
+			// If ANSI support is enabled, use the stripped position for the positions map.
+			const size_t stripped_pos = pair.second.second;
+			positions.insert({pair.first, stripped_pos - name_lengths + rendered_lengths});
+#endif
+
+			// Render the piece, then output the extra text from the format string followed by the rendered text.
+			const std::string from_format = format.substr(last_pos, unstripped_pos - last_pos);
 			const std::string rendered = pc.render();
+#ifdef STRENDER_NO_ANSI
 			oss << from_format << rendered;
+#else
+			oss << ansi::format(from_format + rendered);
+#endif
+
+			// The last position is right after the $name$.
 			const size_t name_length = 2 + std::strlen(pair.first);
-			last_pos = pair.second + name_length;
+			last_pos = unstripped_pos + name_length;
 
 			name_lengths += name_length;
+#ifdef STRENDER_NO_ANSI
 			rendered_lengths += rendered.length();
+#else
+			rendered_lengths += ansi::length(ansi::format(rendered));
+#endif
 		}
 
 		// If this node has a parent, copy and adjust all of this node's positions.
@@ -138,8 +175,13 @@ namespace strender {
 				parent->positions.insert({pair.first, pair.second + offset});
 		}
 
-		if (last_pos != format.length())
+		if (last_pos != format.length()) {
+#ifdef STRNODE_NO_ANSI
 			oss << format.substr(last_pos);
+#else
+			oss << ansi::format(format.substr(last_pos));
+#endif
+		}
 
 		return cache(oss.str());
 	}

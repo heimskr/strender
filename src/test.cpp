@@ -58,10 +58,10 @@ int main(int, char **) {
 
 	// std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
 
-	strnode root_("*", "hello $one$ $two$ $foo$ $three$ $four$ $five$ bye");
-	strnode foo("foo", "[$bar$]", &root_);
+	strnode root_("*", "^[cyan]hello $one$ $two$ $foo$ $three$ $four$ $five$^[/f] bye");
+	strnode foo("foo", "[^b$bar$^B]", &root_);
 	root_ = {
-		{"one", "hi"}, {"two", "hello there"}, {"three", "what's up"}, {"four", "idk :^)"}, {"five", "k"},
+		{"one", "hi"}, {"two", "hello there"}, {"three", "what's ^uup^U"}, {"four", "idk :^^)"}, {"five", "k"},
 		{"bar", "greetings"}
 	};
 

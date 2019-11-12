@@ -34,6 +34,7 @@ namespace strender {
 			const std::string & cache(std::string &&);
 
 		public:
+			/** Contains the positions within the *formatted* input string of each piece. */
 			size_map positions;
 
 			strnode(const char *, const std::string &, strnode * = nullptr);
