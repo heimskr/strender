@@ -19,7 +19,7 @@ namespace strender {
 	 */
 	class strnode {
 		private:
-			bool empty = false;
+			// bool empty = false;
 			strnode *parent = nullptr;
 			std::string format;
 			strnode_f func;
@@ -42,14 +42,9 @@ namespace strender {
 			/** Contains the positions within the *formatted* input string of each piece. */
 			size_map positions;
 
-			strnode();
+			strnode() = delete;
 			strnode(const char *, const std::string &, strnode * = nullptr);
 			strnode(const char *, strnode_f, strnode * = nullptr);
-			~strnode();
-
-			// strnode(const strnode &) = delete;
-			// strnode & operator=(const strnode &) = delete;
-			// strnode & operator=(strnode &&);
 
 			strnode & operator=(const piece_map &);
 
@@ -68,7 +63,7 @@ namespace strender {
 			/** Creates a copy of this node with a different parent. */
 			void copy(strnode *new_parent, strnode &out) const;
 
-			strnode & operator+=(const std::pair<const char *, strnode *> &);
+			strnode & operator+=(const std::pair<std::string, strnode *> &);
 	};
 }
 

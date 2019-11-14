@@ -14,24 +14,7 @@
 #endif
 
 namespace strender {
-	strnode::~strnode() {
-		DBG(ansi::color::red << "DESTROYING (" << full_id() << ", " << this << ")" << (empty? ", empty" : ""));
-	}
-
-	// strnode & strnode::operator=(strnode &&other) {
-	// 	empty = other.empty;
-	// 	parent = other.parent;
-	// 	format = std::move(other.format);
-	// 	func = std::move(other.func);
-	// 	input = std::move(other.input);
-	// 	cached = std::move(other.cached);
-	// 	id = other.id;
-	// 	positions = std::move(other.positions);
-	// 	other.empty = true;
-	// 	return *this;
-	// }
-
-	strnode::strnode(): empty(true), parent(nullptr), id("?") {}
+	// strnode::strnode(): empty(true), parent(nullptr), id("?") {}
 
 	strnode::strnode(const char *id_, const std::string &format_, strnode *parent_):
 		parent(parent_), format(format_), func({}), id(id_) { init(); }
@@ -40,42 +23,32 @@ namespace strender {
 		parent(parent_), format(""), func(func_),   id(id_) { init(); }
 
 	strnode & strnode::operator=(const piece_map &map) {
-		DBG("salve. hoc est");
-		DBG("    (" << full_id() << ")");
 		for (const auto &pair: map) {
-			// DBG("Hello. [" << pair.first << "], id[" << full_id() << "]");
-			// for (const auto &wow: *input) DBG("(" << wow.first << ")");
 			if (0 < input->count(pair.first))
 				input->erase(pair.first);
-			// DBG("[[" << pair.first << "]]");
 			input->insert({pair.first, pair.second});
 		}
 
 		cached->clear();
-		DBG("hello. i'm [" << full_id() << "]");
 		auto_assign();
 		return *this;
 	}
 
 	std::string strnode::full_id() const {
-		if (!id) return "NULL";
+		if (!id)
+			return "NULL";
 		return parent? parent->full_id() + ":" + id : id;
 	}
 
 	void strnode::init() {
 		if (parent) {
 			*parent += {id, this};
-			DBG("Inheriting: " << input << "[" << full_id() << "] <- " << parent->input << "[" << parent->id << "]" <<
-				(parent->input != nullptr? " :: " + std::to_string(parent->input->size()) : std::string()));
 			input    = parent->input;
 			cached   = parent->cached;
 		} else {
-			// DBG(id << ": new things.");
 			input  = std::make_shared<piece_map>();
 			cached = std::make_shared<string_map>();
 		}
-
-		DBG(ansi::color::magenta << "init(" << full_id() << ", " << this << ")");
 	}
 
 	bool strnode::is_atomic() const {
@@ -115,7 +88,7 @@ namespace strender {
 		// Find all positions and insert pairs of the identifiers and positions in order into a list.
 		// The first position in the pair is a position within the unstripped format string.
 		// The second is within the stripped format string.
-		std::list<std::pair<const char *, std::pair<size_t, size_t>>> position_list {};
+		std::list<std::pair<std::string, std::pair<size_t, size_t>>> position_list {};
 		const std::string stripped_format = ansi::strip(format);
 		for (const auto &pair: *input) {
 			// Look for $name$ in the format string.
@@ -125,11 +98,11 @@ namespace strender {
 				continue;
 
 #ifdef STRENDER_NO_ANSI
-			const std::pair<const char *, std::pair<size_t, size_t>> to_insert = {pair.first, {pos, 0}};
+			const std::pair<std::string, std::pair<size_t, size_t>> to_insert = {pair.first, {pos, 0}};
 #else
 			// If we found $name$ in the format string, find it in the stripped format string too.
 			const size_t stripped_pos = stripped_format.find(to_find);
-			const std::pair<const char *, std::pair<size_t, size_t>> to_insert = {pair.first, {pos, stripped_pos}};
+			const std::pair<std::string, std::pair<size_t, size_t>> to_insert = {pair.first, {pos, stripped_pos}};
 #endif
 
 			if (position_list.empty() || pos < position_list.front().second.first) {
@@ -189,7 +162,7 @@ namespace strender {
 #endif
 
 			// The last position is right after the $name$.
-			const size_t name_length = 2 + std::strlen(pair.first);
+			const size_t name_length = 2 + pair.first.length();
 			last_pos = unstripped_pos + name_length;
 
 			name_lengths += name_length;
@@ -219,20 +192,11 @@ namespace strender {
 	}
 
 	void strnode::auto_assign() {
-		DBG(ansi::color::yeen << "AUTO(" << full_id() << ", " << this << "):" << empty);
-		DBG(ansi::color::yeen << "input.size[" << input->size() << "]");
-		if (parent && input) {
+		if (parent && input)
 			input->insert({id, this});
-		} else if (parent) {
-			DBG(ansi::color::red << "parent but no input for " << full_id());
-		}
 
-		DBG("children[" << children.size() << "]");
-		for (auto &pair: children) {
-			DBG(ansi::color::cyan << "[" << full_id() << "]: " << pair.first);
-			DBG(ansi::color::cyan << "---- " << pair.second->id);
+		for (auto &pair: children)
 			pair.second->auto_assign();
-		}
 	}
 
 	void strnode::reset_all() {
@@ -251,7 +215,6 @@ namespace strender {
 
 	void strnode::copy(strnode *new_parent, strnode &out) const {
 		out = *this;
-		// DBG("copy()");
 		out.parent = new_parent;
 		if (new_parent) {
 			*new_parent += {id, &out};
@@ -277,11 +240,9 @@ namespace strender {
 		return *this;
 	}
 
-	strnode & strnode::operator+=(const std::pair<const char *, strnode *> &pair) {
-		if (0 < children.count(pair.first)) {
-			DBG(ansi::color::red << "erasing " << pair.first);
+	strnode & strnode::operator+=(const std::pair<std::string, strnode *> &pair) {
+		if (0 < children.count(pair.first))
 			children.erase(pair.first);
-		}
 		pair.second->parent = this;
 		children.insert({pair.first, pair.second});
 		return *this;

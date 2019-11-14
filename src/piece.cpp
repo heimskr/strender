@@ -9,8 +9,4 @@ namespace strender {
 			return str;
 		return node->render();
 	}
-
-	inline bool piece::is_atomic() const {
-		return !node;
-	}
 }

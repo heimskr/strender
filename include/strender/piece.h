@@ -20,7 +20,7 @@ namespace strender {
 			piece(strnode *node_): node(node_) {}
 
 			std::string render();
-			inline bool is_atomic() const;
+			inline bool is_atomic() const { return !node; }
 	};
 }
 
