@@ -19,7 +19,6 @@ namespace strender {
 	 */
 	class strnode {
 		private:
-			// bool empty = false;
 			strnode *parent = nullptr;
 			std::string format;
 			strnode_f func;
@@ -46,23 +45,30 @@ namespace strender {
 			strnode(const char *, const std::string &, strnode * = nullptr);
 			strnode(const char *, strnode_f, strnode * = nullptr);
 
+			/** Feeds data to the input map. */
 			strnode & operator=(const piece_map &);
-
 			/** Overrides the strnode with a function. */
 			strnode & operator=(strnode_f);
 			/** Overrides the strnode with a format string. */
 			strnode & operator=(const std::string &);
 
+			/** Consumes a map of input and renders a string. */
 			std::string render(const piece_map &);
+			/** Renders a string. */
 			std::string render();
+			/** Adds this node and all its children to the input map. */
 			void auto_assign();
+			/** Clears the cache. */
 			void reset_all();
+			/** Removes this node and all its ancestors from the cache. */
 			void uncache();
+			/** Returns whether this node renders from a format string instead of a function. */
 			bool is_format() const;
 
 			/** Creates a copy of this node with a different parent. */
 			void copy(strnode *new_parent, strnode &out) const;
 
+			/** Adds a child node, replacing any previous node that might've existed at the same key. */
 			strnode & operator+=(const std::pair<std::string, strnode *> &);
 	};
 }
