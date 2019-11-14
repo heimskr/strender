@@ -14,6 +14,25 @@
 #endif
 
 namespace strender {
+	strnode::~strnode() {
+		DBG(ansi::color::red << "DESTROYING (" << full_id() << ", " << this << ")" << (empty? ", empty" : ""));
+	}
+
+	// strnode & strnode::operator=(strnode &&other) {
+	// 	empty = other.empty;
+	// 	parent = other.parent;
+	// 	format = std::move(other.format);
+	// 	func = std::move(other.func);
+	// 	input = std::move(other.input);
+	// 	cached = std::move(other.cached);
+	// 	id = other.id;
+	// 	positions = std::move(other.positions);
+	// 	other.empty = true;
+	// 	return *this;
+	// }
+
+	strnode::strnode(): empty(true), parent(nullptr), id("?") {}
+
 	strnode::strnode(const char *id_, const std::string &format_, strnode *parent_):
 		parent(parent_), format(format_), func({}), id(id_) { init(); }
 
@@ -21,33 +40,42 @@ namespace strender {
 		parent(parent_), format(""), func(func_),   id(id_) { init(); }
 
 	strnode & strnode::operator=(const piece_map &map) {
+		DBG("salve. hoc est");
+		DBG("    (" << full_id() << ")");
 		for (const auto &pair: map) {
+			// DBG("Hello. [" << pair.first << "], id[" << full_id() << "]");
+			// for (const auto &wow: *input) DBG("(" << wow.first << ")");
 			if (0 < input->count(pair.first))
 				input->erase(pair.first);
+			// DBG("[[" << pair.first << "]]");
 			input->insert({pair.first, pair.second});
 		}
 
 		cached->clear();
+		DBG("hello. i'm [" << full_id() << "]");
 		auto_assign();
 		return *this;
 	}
 
-	strnode::~strnode() {
-		if (!parent) {
-			delete input;
-			delete cached;
-		}
+	std::string strnode::full_id() const {
+		if (!id) return "NULL";
+		return parent? parent->full_id() + ":" + id : id;
 	}
 
 	void strnode::init() {
 		if (parent) {
 			*parent += {id, this};
+			DBG("Inheriting: " << input << "[" << full_id() << "] <- " << parent->input << "[" << parent->id << "]" <<
+				(parent->input != nullptr? " :: " + std::to_string(parent->input->size()) : std::string()));
 			input    = parent->input;
 			cached   = parent->cached;
 		} else {
-			input  = new piece_map();
-			cached = new string_map();
+			// DBG(id << ": new things.");
+			input  = std::make_shared<piece_map>();
+			cached = std::make_shared<string_map>();
 		}
+
+		DBG(ansi::color::magenta << "init(" << full_id() << ", " << this << ")");
 	}
 
 	bool strnode::is_atomic() const {
@@ -68,6 +96,11 @@ namespace strender {
 		cached->erase(id);
 		cached->insert({id, std::move(str)});
 		return cached->at(id);
+	}
+
+	std::string strnode::render(const piece_map &pieces) {
+		*this = pieces;
+		return render();
 	}
 
 	std::string strnode::render() {
@@ -186,11 +219,20 @@ namespace strender {
 	}
 
 	void strnode::auto_assign() {
-		if (parent)
+		DBG(ansi::color::yeen << "AUTO(" << full_id() << ", " << this << "):" << empty);
+		DBG(ansi::color::yeen << "input.size[" << input->size() << "]");
+		if (parent && input) {
 			input->insert({id, this});
+		} else if (parent) {
+			DBG(ansi::color::red << "parent but no input for " << full_id());
+		}
 
-		for (auto &pair: children)
+		DBG("children[" << children.size() << "]");
+		for (auto &pair: children) {
+			DBG(ansi::color::cyan << "[" << full_id() << "]: " << pair.first);
+			DBG(ansi::color::cyan << "---- " << pair.second->id);
 			pair.second->auto_assign();
+		}
 	}
 
 	void strnode::reset_all() {
@@ -209,14 +251,15 @@ namespace strender {
 
 	void strnode::copy(strnode *new_parent, strnode &out) const {
 		out = *this;
+		// DBG("copy()");
 		out.parent = new_parent;
 		if (new_parent) {
 			*new_parent += {id, &out};
 			out.input = new_parent->input;
 			out.cached = new_parent->cached;
 		} else {
-			out.input  = new piece_map();
-			out.cached = new string_map();
+			out.input  = std::make_shared<piece_map>();
+			out.cached = std::make_shared<string_map>();
 		}
 	}
 
@@ -235,8 +278,10 @@ namespace strender {
 	}
 
 	strnode & strnode::operator+=(const std::pair<const char *, strnode *> &pair) {
-		if (0 < children.count(pair.first))
+		if (0 < children.count(pair.first)) {
+			DBG(ansi::color::red << "erasing " << pair.first);
 			children.erase(pair.first);
+		}
 		pair.second->parent = this;
 		children.insert({pair.first, pair.second});
 		return *this;

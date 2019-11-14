@@ -1,11 +1,14 @@
 #ifndef STRENDER_STRNODE_H_
 #define STRENDER_STRNODE_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "strender/defs.h"
 #include "strender/piece.h"
+
+#include "lib/formicine/ansi.h"
 
 namespace strender {
 	/**
@@ -16,13 +19,14 @@ namespace strender {
 	 */
 	class strnode {
 		private:
-			strnode *parent;
+			bool empty = false;
+			strnode *parent = nullptr;
 			std::string format;
 			strnode_f func;
-			piece_map *input = nullptr;
-			string_map *cached = nullptr;
+			std::shared_ptr<piece_map> input;
+			std::shared_ptr<string_map> cached;
 
-			strnode_map children {};
+			strnode_map children = {};
 
 			const char *id;
 
@@ -32,6 +36,7 @@ namespace strender {
 			bool is_cached() const;
 			const std::string & get_cached() const;
 			const std::string & cache(std::string &&);
+			std::string full_id() const;
 
 		public:
 			/** Contains the positions within the *formatted* input string of each piece. */
@@ -40,15 +45,20 @@ namespace strender {
 			strnode();
 			strnode(const char *, const std::string &, strnode * = nullptr);
 			strnode(const char *, strnode_f, strnode * = nullptr);
-			strnode & operator=(const piece_map &);
-			
 			~strnode();
+
+			// strnode(const strnode &) = delete;
+			// strnode & operator=(const strnode &) = delete;
+			// strnode & operator=(strnode &&);
+
+			strnode & operator=(const piece_map &);
 
 			/** Overrides the strnode with a function. */
 			strnode & operator=(strnode_f);
 			/** Overrides the strnode with a format string. */
 			strnode & operator=(const std::string &);
 
+			std::string render(const piece_map &);
 			std::string render();
 			void auto_assign();
 			void reset_all();
