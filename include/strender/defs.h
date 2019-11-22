@@ -1,6 +1,7 @@
 #ifndef STRENDER_DEFS_H_
 #define STRENDER_DEFS_H_
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 
