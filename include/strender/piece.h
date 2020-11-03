@@ -3,24 +3,24 @@
 
 #include <string>
 
-#include "strender/defs.h"
+#include "strender/Defs.h"
 
-namespace strender {
+namespace Strender {
 	/**
-	 * Represents either a string or a strnode.
+	 * Represents either a string or a StrNode.
 	 */
-	class piece {
+	class Piece {
 		private:
 			std::string str {};
-			strnode *node = nullptr;
+			StrNode *node = nullptr;
 
 		public:
-			piece(const std::string &str_): str(str_) {}
-			piece(const char *str_): str(str_) {}
-			piece(strnode *node_): node(node_) {}
+			Piece(const std::string &str_): str(str_) {}
+			Piece(const char *str_): str(str_) {}
+			Piece(StrNode *node_): node(node_) {}
 
 			std::string render();
-			inline bool is_atomic() const { return !node; }
+			inline bool isAtomic() const { return !node; }
 	};
 }
 

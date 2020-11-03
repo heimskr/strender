@@ -5,15 +5,15 @@
 #include <string>
 #include <unordered_map>
 
-namespace strender {
-	class strnode;
-	class piece;
+namespace Strender {
+	class StrNode;
+	class Piece;
 
-	using string_map  = std::unordered_map<std::string, std::string>;
-	using piece_map   = std::unordered_map<std::string, piece>;
-	using strnode_map = std::unordered_map<std::string, strnode *>;
-	using size_map    = std::unordered_map<std::string, size_t>;
-	using strnode_f   = std::function<std::string(piece_map &)>;
+	using StringMap  = std::unordered_map<std::string, std::string>;
+	using PieceMap   = std::unordered_map<std::string, Piece>;
+	using StrNodeMap = std::unordered_map<std::string, StrNode *>;
+	using SizeMap    = std::unordered_map<std::string, size_t>;
+	using StrNode_f  = std::function<std::string(PieceMap &)>;
 }
 
 #endif

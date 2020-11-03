@@ -3,13 +3,13 @@
 #include <string>
 #include <vector>
 
-#include "strender/defs.h"
-#include "strender/strnode.h"
+#include "strender/Defs.h"
+#include "strender/StrNode.h"
 
 #include "lib/formicine/ansi.h"
 
 int main(int, char **) {
-	using namespace strender;
+	using namespace Strender;
 	using namespace std::string_literals;
 
 	ansi::dbgstream << "-------------\n\e[2J\e[H";
@@ -19,13 +19,13 @@ int main(int, char **) {
 	// root <            [n]ick < [r]aw_nick
 	//        [m]essage - [raw]_message
 
-	strnode root("*", "$header$ $message$");
+	StrNode root("*", "$header$ $message$");
 
-	strnode header("header", "<$hats$$nick$>", &root);
-	strnode nick("nick", "$nick_raw$", &header);
+	StrNode header("header", "<$hats$$nick$>", &root);
+	StrNode nick("nick", "$nick_raw$", &header);
 
 	// Reverse raw message and surround with brackets.
-	strnode s_message("message", [](piece_map &map) -> std::string {
+	StrNode s_message("message", [](PieceMap &map) -> std::string {
 		static std::string colors[] = {"1", "8;5;202", "3", "2", "6", "4", "8;5;56", "5"};
 		std::ostringstream oss;
 		int i = -1;
@@ -47,7 +47,7 @@ int main(int, char **) {
 
 	// std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
 
-	nick = [](piece_map &map) -> std::string {
+	nick = [](PieceMap &map) -> std::string {
 		std::string raw = map.at("nick_raw").render();
 		std::string out;
 		std::transform(raw.begin(), raw.end(), std::back_inserter(out), [](char ch) {
@@ -58,8 +58,8 @@ int main(int, char **) {
 
 	// std::cout << "\e[2m\"\e[0m" << root.render() << "\e[2m\"\e[0m\n";
 
-	strnode root_("*", "^[cyan]hello $one$ $two$ $foo$ $three$ $four$ $five$^[/f] bye");
-	strnode foo("foo", "[^b$bar$^B]", &root_);
+	StrNode root_("*", "^[cyan]hello $one$ $two$ $foo$ $three$ $four$ $five$^[/f] bye");
+	StrNode foo("foo", "[^b$bar$^B]", &root_);
 	root_ = {
 		{"one", "hi"}, {"two", "hello there"}, {"three", "what's ^uup^U"}, {"four", "idk :^^)"}, {"five", "k"},
 		{"bar", "greetings"}

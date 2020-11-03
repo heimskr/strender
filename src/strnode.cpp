@@ -2,8 +2,8 @@
 #include <list>
 #include <sstream>
 
-#include "strender/piece.h"
-#include "strender/strnode.h"
+#include "strender/Piece.h"
+#include "strender/StrNode.h"
 
 #ifndef STRENDER_NO_ANSI
 #include "lib/formicine/ansi.h"
@@ -13,16 +13,16 @@
 #define STRENDER_SIGIL "$"
 #endif
 
-namespace strender {
-	// strnode::strnode(): empty(true), parent(nullptr), id("?") {}
+namespace Strender {
+	// StrNode::StrNode(): empty(true), parent(nullptr), id("?") {}
 
-	strnode::strnode(const char *id_, const std::string &format_, strnode *parent_):
+	StrNode::StrNode(const char *id_, const std::string &format_, StrNode *parent_):
 		parent(parent_), format(format_), func({}), id(id_) { init(); }
 
-	strnode::strnode(const char *id_, strnode_f func_, strnode *parent_):
+	StrNode::StrNode(const char *id_, StrNode_f func_, StrNode *parent_):
 		parent(parent_), format(""), func(func_),   id(id_) { init(); }
 
-	strnode & strnode::operator=(const piece_map &map) {
+	StrNode & StrNode::operator=(const PieceMap &map) {
 		for (const auto &pair: map) {
 			if (0 < input->count(pair.first))
 				input->erase(pair.first);
@@ -30,57 +30,57 @@ namespace strender {
 		}
 
 		cached->clear();
-		auto_assign();
+		autoAssign();
 		return *this;
 	}
 
-	std::string strnode::full_id() const {
+	std::string StrNode::fullID() const {
 		if (!id)
 			return "NULL";
-		return parent? parent->full_id() + ":" + id : id;
+		return parent? parent->fullID() + ":" + id : id;
 	}
 
-	void strnode::init() {
+	void StrNode::init() {
 		if (parent) {
 			*parent += {id, this};
 			input    = parent->input;
 			cached   = parent->cached;
 		} else {
-			input  = std::make_shared<piece_map>();
-			cached = std::make_shared<string_map>();
+			input  = std::make_shared<PieceMap>();
+			cached = std::make_shared<StringMap>();
 		}
 	}
 
-	bool strnode::is_atomic() const {
+	bool StrNode::isAtomic() const {
 		return children.empty();
 	}
 
-	bool strnode::is_cached() const {
+	bool StrNode::isCached() const {
 		return 0 < cached->count(id);
 	}
 
-	const std::string & strnode::get_cached() const {
-		if (!is_cached())
+	const std::string & StrNode::getCached() const {
+		if (!isCached())
 			throw std::runtime_error("Attempted to get cached value when none exists");
 		return cached->at(id);
 	}
 
-	const std::string & strnode::cache(std::string &&str) {
+	const std::string & StrNode::cache(std::string &&str) {
 		cached->erase(id);
 		cached->insert({id, std::move(str)});
 		return cached->at(id);
 	}
 
-	std::string strnode::render(const piece_map &pieces) {
+	std::string StrNode::render(const PieceMap &pieces) {
 		*this = pieces;
 		return render();
 	}
 
-	std::string strnode::render() {
+	std::string StrNode::render() {
 		static const std::string sigil = STRENDER_SIGIL;
 
-		if (is_cached())
-			return get_cached();
+		if (isCached())
+			return getCached();
 
 		if (func)
 			return cache(func(*input));
@@ -139,7 +139,7 @@ namespace strender {
 		size_t rendered_lengths = 0;
 
 		for (const auto &pair: position_list) {
-			piece &pc = input->at(pair.first);
+			Piece &pc = input->at(pair.first);
 			const size_t unstripped_pos = pair.second.first;
 
 			// Adjust the position (subtract the length of the $names$ and add the length
@@ -181,7 +181,7 @@ namespace strender {
 		}
 
 		if (last_pos != format.length()) {
-#ifdef STRNODE_NO_ANSI
+#ifdef StrNode_NO_ANSI
 			oss << format.substr(last_pos);
 #else
 			oss << ansi::format(format.substr(last_pos));
@@ -191,29 +191,29 @@ namespace strender {
 		return cache(oss.str());
 	}
 
-	void strnode::auto_assign() {
+	void StrNode::autoAssign() {
 		if (parent && input)
 			input->insert({id, this});
 
 		for (auto &pair: children)
-			pair.second->auto_assign();
+			pair.second->autoAssign();
 	}
 
-	void strnode::reset_all() {
+	void StrNode::resetAll() {
 		cached->clear();
 	}
 
-	void strnode::uncache() {
+	void StrNode::uncache() {
 		cached->erase(id);
 		if (parent)
 			parent->uncache();
 	}
 
-	bool strnode::is_format() const {
+	bool StrNode::isFormat() const {
 		return !func;
 	}
 
-	void strnode::copy(strnode *new_parent, strnode &out) const {
+	void StrNode::copy(StrNode *new_parent, StrNode &out) const {
 		out = *this;
 		out.parent = new_parent;
 		if (new_parent) {
@@ -221,26 +221,26 @@ namespace strender {
 			out.input = new_parent->input;
 			out.cached = new_parent->cached;
 		} else {
-			out.input  = std::make_shared<piece_map>();
-			out.cached = std::make_shared<string_map>();
+			out.input  = std::make_shared<PieceMap>();
+			out.cached = std::make_shared<StringMap>();
 		}
 	}
 
-	strnode & strnode::operator=(strnode_f func_) {
+	StrNode & StrNode::operator=(StrNode_f func_) {
 		func = func_;
 		format.clear();
 		uncache();
 		return *this;
 	}
 
-	strnode & strnode::operator=(const std::string &format_) {
+	StrNode & StrNode::operator=(const std::string &format_) {
 		format = format_;
 		func = {};
 		uncache();
 		return *this;
 	}
 
-	strnode & strnode::operator+=(const std::pair<std::string, strnode *> &pair) {
+	StrNode & StrNode::operator+=(const std::pair<std::string, StrNode *> &pair) {
 		if (0 < children.count(pair.first))
 			children.erase(pair.first);
 		pair.second->parent = this;

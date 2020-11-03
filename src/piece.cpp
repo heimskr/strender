@@ -1,11 +1,11 @@
 #include <iostream>
 
-#include "strender/piece.h"
-#include "strender/strnode.h"
+#include "strender/Piece.h"
+#include "strender/StrNode.h"
 
-namespace strender {
-	std::string piece::render() {
-		if (is_atomic())
+namespace Strender {
+	std::string Piece::render() {
+		if (isAtomic())
 			return str;
 		return node->render();
 	}

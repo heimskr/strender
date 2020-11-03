@@ -5,71 +5,71 @@
 #include <string>
 #include <unordered_map>
 
-#include "strender/defs.h"
-#include "strender/piece.h"
+#include "strender/Defs.h"
+#include "strender/Piece.h"
 
 #include "lib/formicine/ansi.h"
 
-namespace strender {
+namespace Strender {
 	/**
 	 * There are two ways of producing a rendered string: format strings and custom functions. Format strings are
 	 * simple strings that glue together subpieces, whereas custom functions are given all the subpieces and left to
-	 * their own devices. A strnode is pretty much an either-or container that contains both a format string and a
+	 * their own devices. A StrNode is pretty much an either-or container that contains both a format string and a
 	 * custom function, but one is always blank.
 	 */
-	class strnode {
+	class StrNode {
 		private:
-			strnode *parent = nullptr;
+			StrNode *parent = nullptr;
 			std::string format;
-			strnode_f func;
-			std::shared_ptr<piece_map> input;
-			std::shared_ptr<string_map> cached;
+			StrNode_f func;
+			std::shared_ptr<PieceMap> input;
+			std::shared_ptr<StringMap> cached;
 
-			strnode_map children = {};
+			StrNodeMap children = {};
 
 			const char *id;
 
 			void init();
 
-			bool is_atomic() const;
-			bool is_cached() const;
-			const std::string & get_cached() const;
+			bool isAtomic() const;
+			bool isCached() const;
+			const std::string & getCached() const;
 			const std::string & cache(std::string &&);
-			std::string full_id() const;
+			std::string fullID() const;
 
 		public:
 			/** Contains the positions within the *formatted* input string of each piece. */
-			size_map positions;
+			SizeMap positions;
 
-			strnode() = delete;
-			strnode(const char *, const std::string &, strnode * = nullptr);
-			strnode(const char *, strnode_f, strnode * = nullptr);
+			StrNode() = delete;
+			StrNode(const char *, const std::string &, StrNode * = nullptr);
+			StrNode(const char *, StrNode_f, StrNode * = nullptr);
 
 			/** Feeds data to the input map. */
-			strnode & operator=(const piece_map &);
-			/** Overrides the strnode with a function. */
-			strnode & operator=(strnode_f);
-			/** Overrides the strnode with a format string. */
-			strnode & operator=(const std::string &);
+			StrNode & operator=(const PieceMap &);
+			/** Overrides the StrNode with a function. */
+			StrNode & operator=(StrNode_f);
+			/** Overrides the StrNode with a format string. */
+			StrNode & operator=(const std::string &);
 
 			/** Consumes a map of input and renders a string. */
-			std::string render(const piece_map &);
+			std::string render(const PieceMap &);
 			/** Renders a string. */
 			std::string render();
 			/** Adds this node and all its children to the input map. */
-			void auto_assign();
+			void autoAssign();
 			/** Clears the cache. */
-			void reset_all();
+			void resetAll();
 			/** Removes this node and all its ancestors from the cache. */
 			void uncache();
 			/** Returns whether this node renders from a format string instead of a function. */
-			bool is_format() const;
+			bool isFormat() const;
 
 			/** Creates a copy of this node with a different parent. */
-			void copy(strnode *new_parent, strnode &out) const;
+			void copy(StrNode *new_parent, StrNode &out) const;
 
 			/** Adds a child node, replacing any previous node that might've existed at the same key. */
-			strnode & operator+=(const std::pair<std::string, strnode *> &);
+			StrNode & operator+=(const std::pair<std::string, StrNode *> &);
 	};
 }
 
